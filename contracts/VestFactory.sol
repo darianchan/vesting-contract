@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.9;
 
 import './Vest.sol';
 
@@ -20,7 +20,6 @@ contract VestFactory {
         address _owner,
         address _beneficiary,
         uint256 _tokenAmount,
-        uint256 _timePeriodToVest,
         uint256 _vestDuration,
         uint256 _cliffPeriod,
         bool _revocable
@@ -29,7 +28,6 @@ contract VestFactory {
             _owner,
             _beneficiary,
             _tokenAmount,
-            _timePeriodToVest,
             _vestDuration,
             _cliffPeriod,
             _revocable

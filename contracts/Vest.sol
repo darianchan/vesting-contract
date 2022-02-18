@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -22,7 +22,6 @@ contract Vest {
         address _owner,
         address _beneficiary,
         uint256 _tokenAmount,
-        uint256 _timePeriodToVest,
         uint256 _vestDuration,
         uint256 _cliffPeriod,
         bool _revocable
@@ -30,7 +29,6 @@ contract Vest {
         owner = _owner;
         beneficiary = _beneficiary;
         tokenAmount = _tokenAmount;
-        timePeriodToVest = _timePeriodToVest;
         vestDuration = _vestDuration;
         cliffPeriod = block.timestamp + _cliffPeriod; // assume that starting time is on initial contract deploy
         start = block.timestamp;
@@ -43,25 +41,25 @@ contract Vest {
     }
 
     function releaseToken(address _token) public onlyOwner {
-        require(IERC20(_token).balanceOf(this) > 0, "no more tokens available");
+        require(IERC20(_token).balanceOf(address(this)) > 0, "no more tokens available");
         
         uint256 amountToRelease = releaseableAmount(_token);
         releasedTokens += amountToRelease; // change state before transfer to prevent reentrancy
 
-        (bool success, ) = IERC20(_token).safeTransfer(beneficiary, amountToRelease);
+        (bool success) = IERC20(_token).transfer(beneficiary, amountToRelease);
         require(success);
 
-        Released(amountToRelease);
+        emit Released(amountToRelease);
     }
 
     function revoke(address _token) public onlyOwner {
         require(revocable);
 
-        uint256 balance = IERC20(_token).balanceOf(this);
+        uint256 balance = IERC20(_token).balanceOf(address(this));
         uint256 unreleased = releaseableAmount(_token);
         uint256 refund = balance - unreleased;
 
-        (bool success, ) = IERC20(_token).safeTransfer(owner, refund);
+        (bool success) = IERC20(_token).transfer(owner, refund);
         require(success);
     }
 
@@ -69,12 +67,12 @@ contract Vest {
     /// Helpers ///
     ///////////////
 
-    function releaseableAmount(address _token) public returns (uint256) {
+    function releaseableAmount(address _token) public view returns (uint256) {
         return vestedAmount(_token) - releasedTokens;
     }
 
-    function vestedAmount(address _token) public returns (uint256) {
-        uint256 currentBalance = IERC20(_token).balanceOf(this);
+    function vestedAmount(address _token) public view returns (uint256) {
+        uint256 currentBalance = IERC20(_token).balanceOf(address(this));
         uint256 totalBalance = currentBalance + releasedTokens;
 
         if (block.timestamp < cliffPeriod) {
