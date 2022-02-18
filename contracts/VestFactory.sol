@@ -5,7 +5,7 @@ import './Vest.sol';
 
 contract VestFactory {
     address private owner;
-    Vest[] public vestingContracts;
+    mapping(address => Vest[]) public vestingContracts;
 
     constructor() {
         owner = msg.sender;
@@ -30,6 +30,6 @@ contract VestFactory {
             _cliffPeriod,
             _revocable
         );
-        vestingContracts.push(vestingContract);
+        vestingContracts[_beneficiary].push(vestingContract);
     }
 }
