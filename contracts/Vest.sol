@@ -45,7 +45,7 @@ contract Vest {
     function releaseToken(address _token) public onlyOwner {
         require(IERC20(_token).balanceOf(this) > 0, "no more tokens available");
         
-        uint256 amountToRelease = releaseAbleAmount(_token);
+        uint256 amountToRelease = releaseableAmount(_token);
         releasedTokens += amountToRelease; // change state before transfer to prevent reentrancy
 
         (bool success, ) = IERC20(_token).safeTransfer(beneficiary, amountToRelease);
@@ -54,7 +54,22 @@ contract Vest {
         Released(amountToRelease);
     }
 
-    function releaseAbleAmount(address _token) public returns (uint256) {
+    function revoke(address _token) public onlyOwner {
+        require(revocable);
+
+        uint256 balance = IERC20(_token).balanceOf(this);
+        uint256 unreleased = releaseableAmount(_token);
+        uint256 refund = balance - unreleased;
+
+        (bool success, ) = IERC20(_token).safeTransfer(owner, refund);
+        require(success);
+    }
+
+    ///////////////
+    /// Helpers ///
+    ///////////////
+
+    function releaseableAmount(address _token) public returns (uint256) {
         return vestedAmount(_token) - releasedTokens;
     }
 
