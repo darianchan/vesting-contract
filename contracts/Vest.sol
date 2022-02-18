@@ -7,7 +7,6 @@ contract Vest {
     address private owner;
     address public beneficiary;
 
-    uint256 public tokenAmount; // total token amounts in 10**18 decimals
     uint256 public timePeriodToVest; // duration in unix time seconds
     uint256 public cliffPeriod; // time in unix time seconds
     uint256 public vestDuration;
@@ -21,14 +20,12 @@ contract Vest {
     constructor(
         address _owner,
         address _beneficiary,
-        uint256 _tokenAmount,
         uint256 _vestDuration,
         uint256 _cliffPeriod,
         bool _revocable
     ) {
         owner = _owner;
         beneficiary = _beneficiary;
-        tokenAmount = _tokenAmount;
         vestDuration = _vestDuration;
         cliffPeriod = block.timestamp + _cliffPeriod; // assume that starting time is on initial contract deploy
         start = block.timestamp;
@@ -80,7 +77,7 @@ contract Vest {
         } else if (block.timestamp >= start + vestDuration ) { // if it is fully past the vesting period and nothing has been vested yet, then vest it all
             return totalBalance;
         } else {
-            return totalBalance * ((block.timestamp - start) / vestDuration); // otherwise, vest it linearlly
+            return totalBalance * ((block.timestamp - start) / vestDuration); // otherwise, vest it linearlly TODO: this doesn't work
         }
     }
 }

@@ -19,7 +19,6 @@ contract VestFactory {
     function createVestingContract(
         address _owner,
         address _beneficiary,
-        uint256 _tokenAmount,
         uint256 _vestDuration,
         uint256 _cliffPeriod,
         bool _revocable
@@ -27,7 +26,6 @@ contract VestFactory {
         Vest vestingContract = new Vest(
             _owner,
             _beneficiary,
-            _tokenAmount,
             _vestDuration,
             _cliffPeriod,
             _revocable
