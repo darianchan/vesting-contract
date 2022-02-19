@@ -5,6 +5,9 @@ import './Vest.sol';
 
 contract VestFactory {
     address private owner;
+    /*
+    One beneficiary can have multiple vesting contracts - we maintain a mapping of beneficiary -> all vesting contracts in `vestingContracts`
+    */
     mapping(address => Vest[]) public vestingContracts;
 
     constructor() {
@@ -19,15 +22,19 @@ contract VestFactory {
     function createVestingContract(
         address _owner,
         address _beneficiary,
+        address _tokenToDistribute,
         uint256 _vestDuration,
         uint256 _cliffPeriod,
+        uint256 _numTokensToDistribute,
         bool _revocable
     ) public onlyOwner {
         Vest vestingContract = new Vest(
             _owner,
             _beneficiary,
+            _tokenToDistribute,
             _vestDuration,
             _cliffPeriod,
+            _numTokensToDistribute,
             _revocable
         );
         vestingContracts[_beneficiary].push(vestingContract);
